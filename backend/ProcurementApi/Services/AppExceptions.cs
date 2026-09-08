@@ -1,0 +1,37 @@
+namespace ProcurementApi.Services;
+
+/// <summary>Base for exceptions the global exception middleware knows how to translate into
+/// an HTTP status code, so services stay HTTP-agnostic (Section 7/8 of docs/ANALYSIS.md).</summary>
+public abstract class AppException : Exception
+{
+    protected AppException(string message) : base(message) { }
+}
+
+public class NotFoundException : AppException
+{
+    public NotFoundException(string message) : base(message) { }
+}
+
+/// <summary>Bad credentials at login -> HTTP 401.</summary>
+public class InvalidCredentialsException : AppException
+{
+    public InvalidCredentialsException(string message) : base(message) { }
+}
+
+/// <summary>Valid credentials/role, but not allowed to act on *this* resource
+/// (e.g. a Manager who isn't this employee's manager) -> HTTP 403.</summary>
+public class ForbiddenException : AppException
+{
+    public ForbiddenException(string message) : base(message) { }
+}
+
+/// <summary>Requested action isn't valid from the request's current status -> HTTP 409.</summary>
+public class InvalidStateTransitionException : AppException
+{
+    public InvalidStateTransitionException(string message) : base(message) { }
+}
+
+public class ConcurrencyConflictException : AppException
+{
+    public ConcurrencyConflictException(string message) : base(message) { }
+}

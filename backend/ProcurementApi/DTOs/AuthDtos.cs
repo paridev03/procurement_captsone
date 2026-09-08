@@ -1,0 +1,7 @@
+namespace ProcurementApi.DTOs;
+
+public record LoginRequest(string Email, string Password);
+
+public record LoginResponse(string Token, DateTime ExpiresAt, UserDto User);
+
+public record UserDto(Guid Id, string FullName, string Email, string Role, string Department);

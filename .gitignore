@@ -1,0 +1,13 @@
+# .NET build output
+backend/**/bin/
+backend/**/obj/
+
+# Local SQLite database files
+backend/**/*.db
+backend/**/*.db-shm
+backend/**/*.db-wal
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
