@@ -15,14 +15,14 @@ namespace ProcurementApi.Data.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    FullName = table.Column<string>(type: "TEXT", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
-                    Role = table.Column<int>(type: "INTEGER", nullable: false),
-                    Department = table.Column<string>(type: "TEXT", nullable: false),
-                    ManagerId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FullName = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    Department = table.Column<string>(type: "text", nullable: false),
+                    ManagerId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -39,11 +39,11 @@ namespace ProcurementApi.Data.Migrations
                 name: "Vendors",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    ContactEmail = table.Column<string>(type: "TEXT", nullable: false),
-                    ContactPhone = table.Column<string>(type: "TEXT", nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    ContactEmail = table.Column<string>(type: "text", nullable: false),
+                    ContactPhone = table.Column<string>(type: "text", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,23 +54,23 @@ namespace ProcurementApi.Data.Migrations
                 name: "PurchaseRequests",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    RequestNumber = table.Column<string>(type: "TEXT", nullable: false),
-                    RequesterId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    BusinessJustification = table.Column<string>(type: "TEXT", nullable: false),
-                    Department = table.Column<string>(type: "TEXT", nullable: false),
-                    EstimatedQuantity = table.Column<int>(type: "INTEGER", nullable: false),
-                    EstimatedUnitCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    EstimatedTotalCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    VendorId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    ConcurrencyStamp = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    SubmittedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    ManagerApprovedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    FinanceApprovedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    CompletedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RequestNumber = table.Column<string>(type: "text", nullable: false),
+                    RequesterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    BusinessJustification = table.Column<string>(type: "text", nullable: false),
+                    Department = table.Column<string>(type: "text", nullable: false),
+                    EstimatedQuantity = table.Column<int>(type: "integer", nullable: false),
+                    EstimatedUnitCost = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    EstimatedTotalCost = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    VendorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ConcurrencyStamp = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    SubmittedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ManagerApprovedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    FinanceApprovedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -93,14 +93,14 @@ namespace ProcurementApi.Data.Migrations
                 name: "Payments",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PurchaseRequestId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Method = table.Column<int>(type: "INTEGER", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    TransactionReference = table.Column<string>(type: "TEXT", nullable: true),
-                    FailureReason = table.Column<string>(type: "TEXT", nullable: true),
-                    ProcessedAt = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchaseRequestId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    Method = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    TransactionReference = table.Column<string>(type: "text", nullable: true),
+                    FailureReason = table.Column<string>(type: "text", nullable: true),
+                    ProcessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -117,13 +117,13 @@ namespace ProcurementApi.Data.Migrations
                 name: "RequestApprovals",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PurchaseRequestId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ApproverId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Stage = table.Column<int>(type: "INTEGER", nullable: false),
-                    Decision = table.Column<int>(type: "INTEGER", nullable: false),
-                    Comment = table.Column<string>(type: "TEXT", nullable: true),
-                    DecidedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchaseRequestId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ApproverId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Stage = table.Column<int>(type: "integer", nullable: false),
+                    Decision = table.Column<int>(type: "integer", nullable: false),
+                    Comment = table.Column<string>(type: "text", nullable: true),
+                    DecidedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -146,13 +146,13 @@ namespace ProcurementApi.Data.Migrations
                 name: "RequestStatusHistories",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PurchaseRequestId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    FromStatus = table.Column<int>(type: "INTEGER", nullable: true),
-                    ToStatus = table.Column<int>(type: "INTEGER", nullable: false),
-                    ChangedByUserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ChangedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Notes = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchaseRequestId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FromStatus = table.Column<int>(type: "integer", nullable: true),
+                    ToStatus = table.Column<int>(type: "integer", nullable: false),
+                    ChangedByUserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ChangedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Notes = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

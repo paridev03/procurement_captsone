@@ -38,7 +38,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddDbContext<ProcurementDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Default") ?? "Data Source=procurement.db"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")
+        ?? "Host=localhost;Port=5432;Database=procurement;Username=postgres;Password=postgres"));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
