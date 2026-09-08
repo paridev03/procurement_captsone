@@ -35,3 +35,19 @@ public class ConcurrencyConflictException : AppException
 {
     public ConcurrencyConflictException(string message) : base(message) { }
 }
+
+/// <summary>Well-formed request, but fails a business validation rule the DTO's data
+/// annotations can't express on their own (e.g. an item line referencing a catalog item
+/// that doesn't exist or is inactive) -> HTTP 400.</summary>
+public class ValidationException : AppException
+{
+    public ValidationException(string message) : base(message) { }
+}
+
+/// <summary>A simulated/real external dependency (Budget Service, Vendor gateway, ...)
+/// failed even after retry -> HTTP 503. Distinct from a business rejection (e.g.
+/// insufficient budget), which is a normal ValidationException, not a dependency failure.</summary>
+public class ExternalServiceException : AppException
+{
+    public ExternalServiceException(string message) : base(message) { }
+}

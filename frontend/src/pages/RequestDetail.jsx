@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { requestService, vendorService } from '../api/requestService';
 import { useAuth } from '../context/AuthContext';
 import StatusBadge from '../components/StatusBadge';
+import ApprovalTracker from '../components/ApprovalTracker';
 import { ErrorBanner, Spinner } from '../components/Feedback';
 
 const money = (n) => `$${Number(n).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
@@ -11,6 +12,7 @@ const when = (d) => (d ? new Date(d).toLocaleString() : '—');
 export default function RequestDetail() {
   const { id } = useParams();
   const { user } = useAuth();
+  const location = useLocation();
 
   const [request, setRequest] = useState(null);
   const [error, setError] = useState('');
@@ -18,6 +20,10 @@ export default function RequestDetail() {
   const [comment, setComment] = useState('');
   const [vendors, setVendors] = useState(null);
   const [vendorId, setVendorId] = useState('');
+  const [budgetResult, setBudgetResult] = useState(null);
+  const [budgetChecking, setBudgetChecking] = useState(false);
+  const [quoteResult, setQuoteResult] = useState(null);
+  const [quoting, setQuoting] = useState(false);
 
   const load = useCallback(() => {
     return requestService
@@ -40,11 +46,42 @@ export default function RequestDetail() {
     }
   }, [user.role, request, vendors]);
 
+  useEffect(() => {
+    if (request?.vendor && !vendorId) {
+      setVendorId(request.vendor.id);
+    }
+  }, [request, vendorId]);
+
   if (!request && !error) return <Spinner />;
   if (!request) return <ErrorBanner message={error} />;
 
   const isOwner = request.requester.id === user.id;
   const can = (action) => request.availableActions.includes(action);
+  const isItemized = request.items.length > 0;
+
+  async function handleCheckBudget() {
+    setBudgetChecking(true);
+    setError('');
+    try {
+      setBudgetResult(await requestService.checkBudget(request.id));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBudgetChecking(false);
+    }
+  }
+
+  async function handleRequestQuote() {
+    setQuoting(true);
+    setError('');
+    try {
+      setQuoteResult(await requestService.requestVendorQuote(request.id));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setQuoting(false);
+    }
+  }
 
   async function act(action, fn) {
     setBusy(true);
@@ -62,7 +99,7 @@ export default function RequestDetail() {
 
   return (
     <div>
-      <Link to="/" className="back-link">
+      <Link to="/requests" className="back-link">
         ← Back to worklist
       </Link>
 
@@ -76,9 +113,17 @@ export default function RequestDetail() {
             Edit
           </Link>
         )}
+        {user.role === 'ProcurementAdmin' && isOwner && request.status === 'Draft' && (
+          <Link to={`/procurement/${request.id}/edit`} className="btn btn--ghost">
+            Edit items
+          </Link>
+        )}
       </div>
 
+      <ApprovalTracker request={request} />
+
       <ErrorBanner message={error} />
+      {location.state?.flash && <div className="success-banner">{location.state.flash}</div>}
 
       <div className="card">
         <h2>Details</h2>
@@ -92,24 +137,93 @@ export default function RequestDetail() {
             <span className="value">{request.department}</span>
           </div>
           <div className="detail-item">
-            <span className="label">Quantity</span>
-            <span className="value">{request.estimatedQuantity}</span>
+            <span className="label">Category</span>
+            <span className="value">{request.category?.replaceAll('_', ' ')}</span>
           </div>
+          {isItemized ? (
+            <>
+              <div className="detail-item">
+                <span className="label">Total items</span>
+                <span className="value">{request.totalItems}</span>
+              </div>
+              <div className="detail-item">
+                <span className="label">Total quantity</span>
+                <span className="value">{request.totalQuantity}</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="detail-item">
+                <span className="label">Quantity</span>
+                <span className="value">{request.estimatedQuantity}</span>
+              </div>
+              <div className="detail-item">
+                <span className="label">Unit cost</span>
+                <span className="value">{money(request.estimatedUnitCost)}</span>
+              </div>
+            </>
+          )}
+          {isItemized && request.taxAmount > 0 ? (
+            <>
+              <div className="detail-item">
+                <span className="label">Subtotal</span>
+                <span className="value">{money(request.estimatedTotalCost)}</span>
+              </div>
+              <div className="detail-item">
+                <span className="label">Tax</span>
+                <span className="value">{money(request.taxAmount)}</span>
+              </div>
+            </>
+          ) : null}
           <div className="detail-item">
-            <span className="label">Unit cost</span>
-            <span className="value">{money(request.estimatedUnitCost)}</span>
-          </div>
-          <div className="detail-item">
-            <span className="label">Total cost</span>
-            <span className="value">{money(request.estimatedTotalCost)}</span>
+            <span className="label">Total amount</span>
+            <span className="value">{money(request.totalAmount)}</span>
           </div>
           <div className="detail-item">
             <span className="label">Created</span>
             <span className="value">{when(request.createdAt)}</span>
           </div>
+          {request.modifiedAt && (
+            <div className="detail-item">
+              <span className="label">Last modified</span>
+              <span className="value">
+                {when(request.modifiedAt)}{request.modifiedByName ? ` by ${request.modifiedByName}` : ''}
+              </span>
+            </div>
+          )}
         </div>
         <p style={{ marginTop: 14, fontSize: 13 }}>{request.businessJustification}</p>
       </div>
+
+      {isItemized && (
+        <div className="card">
+          <h2>Items</h2>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Item Code</th>
+                  <th>Description</th>
+                  <th>Quantity</th>
+                  <th>Unit Price</th>
+                  <th>Total Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {request.items.map((i) => (
+                  <tr key={i.id}>
+                    <td>{i.itemCode}</td>
+                    <td>{i.description}</td>
+                    <td>{i.quantity}</td>
+                    <td>{money(i.unitPrice)}</td>
+                    <td>{money(i.totalPrice)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {(request.vendor || request.payment) && (
         <div className="card">
@@ -120,6 +234,18 @@ export default function RequestDetail() {
                 <span className="label">Vendor</span>
                 <span className="value">{request.vendor.name}</span>
               </div>
+            )}
+            {quoteResult && (
+              <>
+                <div className="detail-item">
+                  <span className="label">Quoted unit price</span>
+                  <span className="value">{money(quoteResult.quotedUnitPrice)}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Estimated delivery</span>
+                  <span className="value">{quoteResult.estimatedDeliveryDays} days</span>
+                </div>
+              </>
             )}
             {request.payment && (
               <>
@@ -136,6 +262,13 @@ export default function RequestDetail() {
               </>
             )}
           </div>
+          {user.role === 'ProcurementAdmin' && request.vendor && (
+            <div className="btn-row">
+              <button className="btn btn--ghost" disabled={quoting} onClick={handleRequestQuote}>
+                {quoting ? 'Requesting quote…' : 'Request Vendor Quote'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -179,6 +312,18 @@ export default function RequestDetail() {
       {user.role === 'Finance' && (can('FinanceApprove') || can('FinanceReject')) && (
         <div className="card">
           <h2>Finance decision</h2>
+          <div className="btn-row" style={{ marginBottom: 14 }}>
+            <button className="btn btn--ghost" disabled={budgetChecking} onClick={handleCheckBudget}>
+              {budgetChecking ? 'Checking budget…' : 'Check Budget'}
+            </button>
+          </div>
+          {budgetResult && (
+            <div className={budgetResult.available ? 'success-banner' : 'error-banner'}>
+              {budgetResult.available
+                ? `Budget available — ${money(budgetResult.remainingBudget)} remaining in ${request.department}.`
+                : `Insufficient budget — only ${money(budgetResult.remainingBudget)} remaining in ${request.department}.`}
+            </div>
+          )}
           <div className="form-field">
             <label htmlFor="comment">Comment (optional)</label>
             <textarea id="comment" rows={3} value={comment} onChange={(e) => setComment(e.target.value)} />
@@ -196,7 +341,12 @@ export default function RequestDetail() {
 
       {user.role === 'ProcurementAdmin' && can('SelectVendor') && (
         <div className="card">
-          <h2>Select vendor</h2>
+          <h2>{request.vendor ? 'Override vendor' : 'Select vendor'}</h2>
+          {request.recommendedVendorName && (
+            <p style={{ fontSize: 13, marginBottom: 12 }}>
+              Recommended for {request.category?.replaceAll('_', ' ')}: <strong>{request.recommendedVendorName}</strong>
+            </p>
+          )}
           {vendors === null ? (
             <Spinner />
           ) : (
@@ -218,7 +368,7 @@ export default function RequestDetail() {
                   disabled={busy || !vendorId}
                   onClick={() => act('SelectVendor', () => requestService.selectVendor(request.id, vendorId))}
                 >
-                  Select vendor
+                  {request.vendor ? 'Override vendor' : 'Select vendor'}
                 </button>
               </div>
             </>
@@ -226,13 +376,18 @@ export default function RequestDetail() {
         </div>
       )}
 
-      {user.role === 'ProcurementAdmin' && (can('TriggerPayment') || can('RetryPayment')) && (
+      {user.role === 'ProcurementAdmin' && (can('TriggerPayment') || can('RetryPayment') || request.payment) && (
         <div className="card">
           <h2>Payment</h2>
           <div className="btn-row">
-            <button className="btn" disabled={busy} onClick={() => act('TriggerPayment', () => requestService.triggerPayment(request.id))}>
-              {can('RetryPayment') ? 'Retry payment' : 'Trigger payment'}
-            </button>
+            <Link to={`/payment/${request.id}`} className="btn">
+              {request.payment?.status === 'Success' ? 'View payment' : 'Go to Payment'}
+            </Link>
+            {request.payment?.status === 'Success' && (
+              <Link to={`/invoice/${request.id}`} className="btn btn--ghost">
+                {request.hasInvoice ? 'View invoice' : 'Generate invoice'}
+              </Link>
+            )}
           </div>
         </div>
       )}

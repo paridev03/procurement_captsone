@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { requestService } from '../api/requestService';
 import { ErrorBanner, Spinner } from '../components/Feedback';
+import { CATEGORIES } from '../utils/constants';
 
 const emptyForm = {
   title: '',
   businessJustification: '',
   department: '',
+  category: CATEGORIES[0].value,
   estimatedQuantity: 1,
   estimatedUnitCost: '',
 };
@@ -36,6 +38,7 @@ export default function RequestForm({ mode }) {
           title: r.title,
           businessJustification: r.businessJustification,
           department: r.department,
+          category: r.category,
           estimatedQuantity: r.estimatedQuantity,
           estimatedUnitCost: r.estimatedUnitCost,
         });
@@ -59,6 +62,7 @@ export default function RequestForm({ mode }) {
       title: form.title,
       businessJustification: form.businessJustification,
       department: form.department,
+      category: form.category,
       estimatedQuantity: Number(form.estimatedQuantity),
       estimatedUnitCost: Number(form.estimatedUnitCost),
     };
@@ -79,7 +83,7 @@ export default function RequestForm({ mode }) {
 
   return (
     <div>
-      <Link to="/" className="back-link">
+      <Link to="/requests" className="back-link">
         ← Back to worklist
       </Link>
       <h1>{isEdit ? 'Edit Request' : 'New Purchase Request'}</h1>
@@ -111,15 +115,25 @@ export default function RequestForm({ mode }) {
             />
           </div>
 
-          <div className="form-field">
-            <label htmlFor="department">Department</label>
-            <input
-              id="department"
-              maxLength={100}
-              value={form.department}
-              onChange={(e) => update('department', e.target.value)}
-              required
-            />
+          <div className="form-row">
+            <div className="form-field">
+              <label htmlFor="department">Department</label>
+              <input
+                id="department"
+                maxLength={100}
+                value={form.department}
+                onChange={(e) => update('department', e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="category">Category</label>
+              <select id="category" value={form.category} onChange={(e) => update('category', e.target.value)}>
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="form-row">

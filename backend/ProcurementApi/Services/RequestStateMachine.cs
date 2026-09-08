@@ -35,6 +35,10 @@ public static class RequestStateMachine
         [(RequestStatus.ManagerApproved, RequestAction.FinanceApprove)] = RequestStatus.FinanceApproved,
         [(RequestStatus.ManagerApproved, RequestAction.FinanceReject)] = RequestStatus.Rejected,
         [(RequestStatus.FinanceApproved, RequestAction.SelectVendor)] = RequestStatus.VendorSelected,
+        // Self-transition: lets Procurement Admin override an already-selected vendor
+        // (Phase 2 spec's "Override Vendor") for as long as payment hasn't started yet —
+        // once PaymentInProgress/Completed/PaymentFailed, SelectVendor is no longer legal.
+        [(RequestStatus.VendorSelected, RequestAction.SelectVendor)] = RequestStatus.VendorSelected,
         [(RequestStatus.VendorSelected, RequestAction.TriggerPayment)] = RequestStatus.PaymentInProgress,
         [(RequestStatus.PaymentInProgress, RequestAction.PaymentSucceeded)] = RequestStatus.Completed,
         [(RequestStatus.PaymentInProgress, RequestAction.PaymentFailed)] = RequestStatus.PaymentFailed,

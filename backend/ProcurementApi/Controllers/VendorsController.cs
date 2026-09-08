@@ -23,6 +23,6 @@ public class VendorsController : ControllerBase
     public async Task<ActionResult<List<VendorDto>>> GetActive(CancellationToken ct)
     {
         var vendors = await _vendors.GetActiveAsync(ct);
-        return Ok(vendors.Select(v => new VendorDto(v.Id, v.Name, v.ContactEmail, v.ContactPhone)).ToList());
+        return Ok(vendors.Select(v => new VendorDto(v.Id, v.Name, v.ContactEmail, v.ContactPhone, v.TaxId)).ToList());
     }
 }

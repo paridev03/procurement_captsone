@@ -22,6 +22,162 @@ namespace ProcurementApi.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ProcurementApi.Domain.Entities.DepartmentBudget", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("SpentAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalBudget")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Department")
+                        .IsUnique();
+
+                    b.ToTable("DepartmentBudgets");
+                });
+
+            modelBuilder.Entity("ProcurementApi.Domain.Entities.Invoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("GrandTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InvoiceNumber")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ModifiedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("OtherCharges")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("SubTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("InvoiceNumber")
+                        .IsUnique();
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.HasIndex("PaymentId");
+
+                    b.HasIndex("PurchaseRequestId")
+                        .IsUnique();
+
+                    b.ToTable("Invoices");
+                });
+
+            modelBuilder.Entity("ProcurementApi.Domain.Entities.Item", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("ProcurementApi.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Event")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("PurchaseRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseRequestId");
+
+                    b.HasIndex("UserId", "IsRead");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("ProcurementApi.Domain.Entities.Payment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -31,11 +187,32 @@ namespace ProcurementApi.Data.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("FailureReason")
                         .HasColumnType("text");
 
                     b.Property<int>("Method")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ModifiedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentReference")
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("timestamp with time zone");
@@ -50,6 +227,10 @@ namespace ProcurementApi.Data.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("PurchaseRequestId")
                         .IsUnique();
@@ -66,6 +247,9 @@ namespace ProcurementApi.Data.Migrations
                     b.Property<string>("BusinessJustification")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
@@ -96,6 +280,12 @@ namespace ProcurementApi.Data.Migrations
                     b.Property<DateTime?>("ManagerApprovedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ModifiedByUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("RequestNumber")
                         .IsRequired()
                         .HasColumnType("text");
@@ -109,14 +299,28 @@ namespace ProcurementApi.Data.Migrations
                     b.Property<DateTime?>("SubmittedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<decimal>("TaxAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TotalItems")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalQuantity")
+                        .HasColumnType("integer");
 
                     b.Property<Guid?>("VendorId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("RequestNumber")
                         .IsUnique();
@@ -126,6 +330,50 @@ namespace ProcurementApi.Data.Migrations
                     b.HasIndex("VendorId");
 
                     b.ToTable("PurchaseRequests");
+                });
+
+            modelBuilder.Entity("ProcurementApi.Domain.Entities.PurchaseRequestItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ItemCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PurchaseRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("PurchaseRequestId");
+
+                    b.ToTable("PurchaseRequestItems");
                 });
 
             modelBuilder.Entity("ProcurementApi.Domain.Entities.RequestApproval", b =>
@@ -256,24 +504,97 @@ namespace ProcurementApi.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("TaxId")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Vendors");
                 });
 
+            modelBuilder.Entity("ProcurementApi.Domain.Entities.Invoice", b =>
+                {
+                    b.HasOne("ProcurementApi.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProcurementApi.Domain.Entities.User", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProcurementApi.Domain.Entities.Payment", "Payment")
+                        .WithMany()
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ProcurementApi.Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithOne("Invoice")
+                        .HasForeignKey("ProcurementApi.Domain.Entities.Invoice", "PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("PurchaseRequest");
+                });
+
+            modelBuilder.Entity("ProcurementApi.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("ProcurementApi.Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithMany()
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("ProcurementApi.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseRequest");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ProcurementApi.Domain.Entities.Payment", b =>
                 {
+                    b.HasOne("ProcurementApi.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProcurementApi.Domain.Entities.User", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("ProcurementApi.Domain.Entities.PurchaseRequest", "PurchaseRequest")
                         .WithOne("Payment")
                         .HasForeignKey("ProcurementApi.Domain.Entities.Payment", "PurchaseRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("PurchaseRequest");
                 });
 
             modelBuilder.Entity("ProcurementApi.Domain.Entities.PurchaseRequest", b =>
                 {
+                    b.HasOne("ProcurementApi.Domain.Entities.User", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("ProcurementApi.Domain.Entities.User", "Requester")
                         .WithMany("Requests")
                         .HasForeignKey("RequesterId")
@@ -285,9 +606,30 @@ namespace ProcurementApi.Data.Migrations
                         .HasForeignKey("VendorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("Requester");
 
                     b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("ProcurementApi.Domain.Entities.PurchaseRequestItem", b =>
+                {
+                    b.HasOne("ProcurementApi.Domain.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ProcurementApi.Domain.Entities.PurchaseRequest", "PurchaseRequest")
+                        .WithMany("Items")
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("PurchaseRequest");
                 });
 
             modelBuilder.Entity("ProcurementApi.Domain.Entities.RequestApproval", b =>
@@ -343,6 +685,10 @@ namespace ProcurementApi.Data.Migrations
                     b.Navigation("Approvals");
 
                     b.Navigation("History");
+
+                    b.Navigation("Invoice");
+
+                    b.Navigation("Items");
 
                     b.Navigation("Payment");
                 });

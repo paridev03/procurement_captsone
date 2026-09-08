@@ -30,10 +30,12 @@ public class ExceptionHandlingMiddleware
             var (status, title) = ex switch
             {
                 NotFoundException => (HttpStatusCode.NotFound, ex.Message),
+                ValidationException => (HttpStatusCode.BadRequest, ex.Message),
                 InvalidCredentialsException => (HttpStatusCode.Unauthorized, ex.Message),
                 ForbiddenException => (HttpStatusCode.Forbidden, ex.Message),
                 InvalidStateTransitionException => (HttpStatusCode.Conflict, ex.Message),
                 ConcurrencyConflictException => (HttpStatusCode.Conflict, ex.Message),
+                ExternalServiceException => (HttpStatusCode.ServiceUnavailable, ex.Message),
                 _ => (HttpStatusCode.InternalServerError, "An unexpected error occurred.")
             };
 

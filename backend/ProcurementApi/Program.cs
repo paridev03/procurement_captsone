@@ -6,6 +6,7 @@ using ProcurementApi.Data;
 using ProcurementApi.Middleware;
 using ProcurementApi.Repositories;
 using ProcurementApi.Services;
+using ProcurementApi.Services.Vendors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,10 +46,21 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
 builder.Services.AddScoped<IVendorRepository, VendorRepository>();
+builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IPurchaseRequestService, PurchaseRequestService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddSingleton<IPaymentGateway, FakePaymentGateway>();
+builder.Services.AddScoped<IBudgetService, SimulatedBudgetService>();
+builder.Services.AddSingleton<IVendorGateway, TechSourceGateway>();
+builder.Services.AddSingleton<IVendorGateway, OfficeMartGateway>();
+builder.Services.AddSingleton<IVendorGateway, EnterpriseSupplyGateway>();
+builder.Services.AddSingleton<IVendorGatewayFactory, VendorGatewayFactory>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+// Observer pattern: PurchaseRequestService fans events out to every IRequestEventObserver
+// registered here — adding a second reactor (audit log, email, ...) is one more line here,
+// no changes anywhere else (OCP).
+builder.Services.AddScoped<IRequestEventObserver, NotificationObserver>();
 
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-only-signing-key-change-me-please-32-bytes-min";
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ProcurementApi";

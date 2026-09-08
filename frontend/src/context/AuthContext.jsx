@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import { login as loginRequest } from '../api/authService';
+import { login as loginRequest, register as registerRequest } from '../api/authService';
 
 const AuthContext = createContext(null);
 
@@ -23,6 +23,14 @@ export function AuthProvider({ children }) {
     return loggedInUser;
   }, []);
 
+  const register = useCallback(async (fullName, email, password, role, department) => {
+    const { token, user: newUser } = await registerRequest(fullName, email, password, role, department);
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(newUser));
+    setUser(newUser);
+    return newUser;
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -30,7 +38,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

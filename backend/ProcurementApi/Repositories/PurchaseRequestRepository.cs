@@ -23,8 +23,11 @@ public class PurchaseRequestRepository : IPurchaseRequestRepository
             .Include(r => r.Requester)
             .Include(r => r.Vendor)
             .Include(r => r.Payment)
+            .Include(r => r.Invoice)
             .Include(r => r.Approvals).ThenInclude(a => a.Approver)
             .Include(r => r.History).ThenInclude(h => h.ChangedBy)
+            .Include(r => r.Items)
+            .Include(r => r.ModifiedByUser)
             .AsSplitQuery();
 
     public Task<PurchaseRequest?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
@@ -33,13 +36,21 @@ public class PurchaseRequestRepository : IPurchaseRequestRepository
     public Task<List<PurchaseRequest>> GetAllAsync(CancellationToken ct = default) =>
         WithGraph().OrderByDescending(r => r.CreatedAt).ToListAsync(ct);
 
+    // Ordered by SubmittedAt when present (falling back to CreatedAt for requests never
+    // submitted) rather than plain CreatedAt, so submitting an older draft brings it to the
+    // top of the requester's own list — not just whichever request was *created* most
+    // recently.
     public Task<List<PurchaseRequest>> GetByRequesterAsync(Guid requesterId, CancellationToken ct = default) =>
-        WithGraph().Where(r => r.RequesterId == requesterId).OrderByDescending(r => r.CreatedAt).ToListAsync(ct);
+        WithGraph().Where(r => r.RequesterId == requesterId)
+            .OrderByDescending(r => r.SubmittedAt ?? r.CreatedAt)
+            .ToListAsync(ct);
 
+    // Most-recently-submitted first, so a newly submitted request appears at the top of the
+    // manager's queue instead of waiting behind everything already pending.
     public Task<List<PurchaseRequest>> GetPendingManagerApprovalAsync(Guid managerId, CancellationToken ct = default) =>
         WithGraph()
             .Where(r => r.Status == RequestStatus.Submitted && r.Requester!.ManagerId == managerId)
-            .OrderBy(r => r.SubmittedAt)
+            .OrderByDescending(r => r.SubmittedAt)
             .ToListAsync(ct);
 
     public Task<List<PurchaseRequest>> GetByStatusAsync(RequestStatus status, CancellationToken ct = default) =>

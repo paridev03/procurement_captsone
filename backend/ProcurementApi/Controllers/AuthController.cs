@@ -15,11 +15,18 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    /// <summary>The only public (unauthenticated) endpoint in the API.</summary>
+    /// <summary>Public (unauthenticated) endpoints — the only two in the API.</summary>
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
         var response = await _authService.LoginAsync(request.Email, request.Password, ct);
+        return Ok(response);
+    }
+
+    [HttpPost("register")]
+    public async Task<ActionResult<LoginResponse>> Register([FromBody] RegisterRequest request, CancellationToken ct)
+    {
+        var response = await _authService.RegisterAsync(request, ct);
         return Ok(response);
     }
 }

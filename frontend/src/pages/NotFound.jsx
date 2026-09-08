@@ -5,7 +5,7 @@ export default function NotFound() {
     <div className="state-block">
       <h2>Page not found</h2>
       <p>
-        <Link to="/">Go back to the worklist</Link>
+        <Link to="/">Go back to the dashboard</Link>
       </p>
     </div>
   );

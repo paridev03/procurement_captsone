@@ -46,6 +46,11 @@ export default function Worklist() {
             + New Request
           </Link>
         )}
+        {user.role === 'ProcurementAdmin' && (
+          <Link to="/procurement/new" className="btn">
+            + New Procurement
+          </Link>
+        )}
       </div>
 
       <ErrorBanner message={error} />

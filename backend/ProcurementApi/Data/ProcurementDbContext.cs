@@ -38,6 +38,11 @@ public class ProcurementDbContext : DbContext
     public DbSet<RequestStatusHistory> RequestStatusHistories => Set<RequestStatusHistory>();
     public DbSet<Vendor> Vendors => Set<Vendor>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<Item> Items => Set<Item>();
+    public DbSet<PurchaseRequestItem> PurchaseRequestItems => Set<PurchaseRequestItem>();
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<DepartmentBudget> DepartmentBudgets => Set<DepartmentBudget>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +60,8 @@ public class ProcurementDbContext : DbContext
             e.HasIndex(r => r.RequestNumber).IsUnique();
             e.Property(r => r.EstimatedUnitCost).HasColumnType("decimal(18,2)");
             e.Property(r => r.EstimatedTotalCost).HasColumnType("decimal(18,2)");
+            e.Property(r => r.TaxAmount).HasColumnType("decimal(18,2)");
+            e.Property(r => r.TotalAmount).HasColumnType("decimal(18,2)");
             e.Property(r => r.ConcurrencyStamp).IsConcurrencyToken();
 
             e.HasOne(r => r.Requester)
@@ -71,6 +78,38 @@ public class ProcurementDbContext : DbContext
                 .WithOne(p => p.PurchaseRequest)
                 .HasForeignKey<Payment>(p => p.PurchaseRequestId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(r => r.Invoice)
+                .WithOne(i => i.PurchaseRequest)
+                .HasForeignKey<Invoice>(i => i.PurchaseRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(r => r.ModifiedByUser)
+                .WithMany()
+                .HasForeignKey(r => r.ModifiedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Item>(e =>
+        {
+            e.HasIndex(i => i.Code).IsUnique();
+            e.Property(i => i.UnitPrice).HasColumnType("decimal(18,2)");
+        });
+
+        modelBuilder.Entity<PurchaseRequestItem>(e =>
+        {
+            e.Property(i => i.UnitPrice).HasColumnType("decimal(18,2)");
+            e.Property(i => i.TotalPrice).HasColumnType("decimal(18,2)");
+
+            e.HasOne(i => i.PurchaseRequest)
+                .WithMany(r => r.Items)
+                .HasForeignKey(i => i.PurchaseRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(i => i.Item)
+                .WithMany()
+                .HasForeignKey(i => i.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<RequestApproval>(e =>
@@ -102,6 +141,63 @@ public class ProcurementDbContext : DbContext
         modelBuilder.Entity<Payment>(e =>
         {
             e.Property(p => p.Amount).HasColumnType("decimal(18,2)");
+
+            e.HasOne(p => p.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(p => p.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(p => p.ModifiedByUser)
+                .WithMany()
+                .HasForeignKey(p => p.ModifiedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Invoice>(e =>
+        {
+            e.HasIndex(i => i.InvoiceNumber).IsUnique();
+            e.Property(i => i.SubTotal).HasColumnType("decimal(18,2)");
+            e.Property(i => i.TaxAmount).HasColumnType("decimal(18,2)");
+            e.Property(i => i.DiscountAmount).HasColumnType("decimal(18,2)");
+            e.Property(i => i.OtherCharges).HasColumnType("decimal(18,2)");
+            e.Property(i => i.GrandTotal).HasColumnType("decimal(18,2)");
+
+            e.HasOne(i => i.Payment)
+                .WithMany()
+                .HasForeignKey(i => i.PaymentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(i => i.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(i => i.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(i => i.ModifiedByUser)
+                .WithMany()
+                .HasForeignKey(i => i.ModifiedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DepartmentBudget>(e =>
+        {
+            e.HasIndex(b => b.Department).IsUnique();
+            e.Property(b => b.TotalBudget).HasColumnType("decimal(18,2)");
+            e.Property(b => b.SpentAmount).HasColumnType("decimal(18,2)");
+        });
+
+        modelBuilder.Entity<Notification>(e =>
+        {
+            e.HasIndex(n => new { n.UserId, n.IsRead });
+
+            e.HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(n => n.PurchaseRequest)
+                .WithMany()
+                .HasForeignKey(n => n.PurchaseRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
